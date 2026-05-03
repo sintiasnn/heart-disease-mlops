@@ -1,0 +1,14 @@
+.DS_Store
+venv
+mlruns
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+*.db
+*.bak
+*.tmp
+*.swp
+*.swo
