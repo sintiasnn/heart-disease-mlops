@@ -1,10 +1,10 @@
-# 🫀 Heart Disease MLOps Pipeline
+# Heart Disease MLOps Pipeline
 
 End-to-end MLOps pipeline untuk prediksi penyakit jantung menggunakan dataset Heart Disease dari UCI Machine Learning Repository. Project ini mencakup seluruh siklus MLOps mulai dari eksperimen, pembangunan model, CI/CD workflow, hingga monitoring dan logging.
 
 ---
 
-## 📋 Daftar Isi
+## Daftar Isi
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
 - [Struktur Project](#struktur-project)
@@ -15,7 +15,7 @@ End-to-end MLOps pipeline untuk prediksi penyakit jantung menggunakan dataset He
 
 ---
 
-## 🔍 Overview
+## Overview
 
 Project ini membangun pipeline MLOps lengkap untuk memprediksi apakah seorang pasien menderita penyakit jantung atau tidak (binary classification) berdasarkan data klinis.
 
@@ -27,7 +27,7 @@ Project ini membangun pipeline MLOps lengkap untuk memprediksi apakah seorang pa
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Kategori | Tools |
 |---|---|
@@ -41,7 +41,7 @@ Project ini membangun pipeline MLOps lengkap untuk memprediksi apakah seorang pa
 
 ---
 
-## 📁 Struktur Project
+## Struktur Project
 
 ```
 heart-disease-mlops/
@@ -72,7 +72,7 @@ heart-disease-mlops/
 
 ---
 
-## 📊 Dataset
+## Dataset
 
 - **Sumber**: [UCI ML Repository - Heart Disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
 - **Jumlah data**: 303 baris, 13 fitur + 1 target
@@ -81,7 +81,7 @@ heart-disease-mlops/
 
 ---
 
-## 🚀 Cara Menjalankan
+## Cara Menjalankan
 
 ### Prerequisites
 - Python 3.12
@@ -163,7 +163,7 @@ python inference.py
 
 ---
 
-## 📈 Hasil Eksperimen
+## Hasil Eksperimen
 
 | Model | Accuracy | Precision | Recall | F1 Score | ROC AUC |
 |---|---|---|---|---|---|
@@ -177,7 +177,7 @@ python inference.py
 
 ---
 
-## 📡 Monitoring
+## Monitoring
 
 Sistem monitoring real-time menggunakan Prometheus dan Grafana dengan metrics:
 
@@ -193,13 +193,13 @@ Sistem monitoring real-time menggunakan Prometheus dan Grafana dengan metrics:
 
 ---
 
-## 👩‍💻 Author
+## Author
 
 **Ni Putu Sintia Wati**
 - GitHub: [@sintiasnn](https://github.com/sintiasnn)
 
 ---
 
-## 📄 License
+## License
 
 This project is open source and available under the [MIT License](LICENSE).
