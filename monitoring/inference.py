@@ -2,7 +2,7 @@ import requests
 import json
 
 # ========================
-# Konfigurasi
+# Configuration
 # ========================
 MODEL_URL = "http://127.0.0.1:5001/invocations"
 HEADERS = {"Content-Type": "application/json"}
@@ -17,13 +17,13 @@ COLUMNS = [
 
 def predict(data: list) -> dict:
     """
-    Melakukan prediksi ke model ML yang sedang di-serve.
+    Predict using the served ML model.
 
     Args:
-        data (list): List of feature values sesuai urutan COLUMNS
+        data (list): List of feature values following the COLUMNS order
 
     Returns:
-        dict: Response dari model berisi predictions
+        dict: Model response containing predictions
     """
     payload = {
         "dataframe_split": {
@@ -37,7 +37,7 @@ def predict(data: list) -> dict:
         if response.status_code == 200:
             result = response.json()
             prediction = result['predictions'][0]
-            label = "Sakit Jantung" if prediction == 1 else "Tidak Sakit Jantung"
+            label = "Heart Disease" if prediction == 1 else "No Heart Disease"
             return {
                 "status": "success",
                 "prediction": prediction,
@@ -60,18 +60,18 @@ if __name__ == "__main__":
     print("  INFERENCE - HEART DISEASE PREDICTION")
     print("=" * 50)
 
-    # Contoh data pasien
+    # Sample patient data
     sample_patients = [
         {
-            "name": "Pasien A (kemungkinan sakit)",
+            "name": "Patient A (likely sick)",
             "data": [0.9, -0.5, -0.2, 0.3, -0.7, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1]
         },
         {
-            "name": "Pasien B (kemungkinan tidak sakit)",
+            "name": "Patient B (likely healthy)",
             "data": [-0.5, 0.3, 0.8, -0.4, 0.2, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0]
         },
         {
-            "name": "Pasien C",
+            "name": "Patient C",
             "data": [0.2, -0.1, -0.5, 0.7, -0.3, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0]
         }
     ]
@@ -80,11 +80,11 @@ if __name__ == "__main__":
         print(f"\n>>> {patient['name']}")
         result = predict(patient['data'])
         if result['status'] == 'success':
-            print(f"    Prediksi : {result['prediction']}")
-            print(f"    Label    : {result['label']}")
+            print(f"    Prediction : {result['prediction']}")
+            print(f"    Label      : {result['label']}")
         else:
-            print(f"    Error    : {result['message']}")
+            print(f"    Error      : {result['message']}")
 
     print("\n" + "=" * 50)
-    print("  INFERENCE SELESAI")
+    print("  INFERENCE DONE")
     print("=" * 50)

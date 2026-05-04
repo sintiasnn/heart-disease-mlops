@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 # ========================
 # Load Dataset
 # ========================
-print(">>> Memuat dataset...")
+print(">>> Loading dataset...")
 train_df = pd.read_csv('heart_disease_preprocessing_train.csv')
 test_df = pd.read_csv('heart_disease_preprocessing_test.csv')
 
@@ -28,7 +28,7 @@ print(f"    X_train: {X_train.shape}, X_test: {X_test.shape}")
 # ========================
 # Hyperparameter Tuning
 # ========================
-print(">>> Melakukan hyperparameter tuning...")
+print(">>> Performing hyperparameter tuning...")
 
 param_grid = {
     'n_estimators': [50, 100, 200],
@@ -57,25 +57,25 @@ mlflow.set_experiment("heart-disease-classification")
 
 with mlflow.start_run(run_name="RandomForest-Tuning"):
 
-    # Train model dengan best params
+    # Train model with best params
     best_model = RandomForestClassifier(
         **best_params,
         random_state=42
     )
     best_model.fit(X_train, y_train)
 
-    # Prediksi
+    # Predict
     y_pred = best_model.predict(X_test)
     y_prob = best_model.predict_proba(X_test)[:, 1]
 
-    # Hitung metrik
+    # Calculate metrics
     accuracy  = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred)
     recall    = recall_score(y_test, y_pred)
     f1        = f1_score(y_test, y_pred)
     roc_auc   = roc_auc_score(y_test, y_prob)
 
-    # Log parameters secara manual
+    # Log parameters manually
     mlflow.log_param("n_estimators", best_params['n_estimators'])
     mlflow.log_param("max_depth", best_params['max_depth'])
     mlflow.log_param("min_samples_split", best_params['min_samples_split'])
@@ -83,7 +83,7 @@ with mlflow.start_run(run_name="RandomForest-Tuning"):
     mlflow.log_param("cv_folds", 5)
     mlflow.log_param("scoring", "f1")
 
-    # Log metrics secara manual
+    # Log metrics manually
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_metric("precision", precision)
     mlflow.log_metric("recall", recall)
@@ -94,8 +94,8 @@ with mlflow.start_run(run_name="RandomForest-Tuning"):
     # Log model
     mlflow.sklearn.log_model(best_model, "model")
 
-    # Print hasil
-    print("\n>>> Hasil Evaluasi:")
+    # Print results
+    print("\n>>> Evaluation Results:")
     print(f"    Accuracy  : {accuracy:.4f}")
     print(f"    Precision : {precision:.4f}")
     print(f"    Recall    : {recall:.4f}")
@@ -109,5 +109,5 @@ with mlflow.start_run(run_name="RandomForest-Tuning"):
     print("\n>>> Confusion Matrix:")
     print(confusion_matrix(y_test, y_pred))
 
-print("\n>>> Training selesai! Buka MLflow UI dengan:")
+print("\n>>> Training finished! Open MLflow UI with:")
 print("    mlflow ui")

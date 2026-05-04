@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 # ========================
 # Load Dataset
 # ========================
-print(">>> Memuat dataset...")
+print(">>> Loading dataset...")
 train_df = pd.read_csv('heart_disease_preprocessing_train.csv')
 test_df = pd.read_csv('heart_disease_preprocessing_test.csv')
 
@@ -26,24 +26,24 @@ print(f"    X_train: {X_train.shape}, X_test: {X_test.shape}")
 mlflow.set_experiment("heart-disease-classification")
 mlflow.sklearn.autolog()
 
-print(">>> Melatih model...")
+print(">>> Training model...")
 model = RandomForestClassifier(
     n_estimators=100,
     random_state=42
 )
 model.fit(X_train, y_train)
 
-# Evaluasi
+# Evaluation
 y_pred = model.predict(X_test)
 accuracy  = accuracy_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred)
 recall    = recall_score(y_test, y_pred)
 f1        = f1_score(y_test, y_pred)
 
-print(">>> Hasil Evaluasi:")
+print(">>> Evaluation Results:")
 print(f"    Accuracy  : {accuracy:.4f}")
 print(f"    Precision : {precision:.4f}")
 print(f"    Recall    : {recall:.4f}")
 print(f"    F1 Score  : {f1:.4f}")
 
-print("\n>>> Training selesai!")
+print("\n>>> Training finished!")

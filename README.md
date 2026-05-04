@@ -1,35 +1,36 @@
 # Heart Disease MLOps Pipeline
 
-End-to-end MLOps pipeline untuk prediksi penyakit jantung menggunakan dataset Heart Disease dari UCI Machine Learning Repository. Project ini mencakup seluruh siklus MLOps mulai dari eksperimen, pembangunan model, CI/CD workflow, hingga monitoring dan logging.
+An end-to-end MLOps pipeline for heart disease prediction using the Heart Disease dataset from the UCI Machine Learning Repository. This project covers the full MLOps lifecycle — from experimentation and model building to CI/CD workflow automation and real-time monitoring.
 
 ---
 
-## Daftar Isi
+## Table of Contents
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
-- [Struktur Project](#struktur-project)
+- [Project Structure](#project-structure)
 - [Dataset](#dataset)
-- [Cara Menjalankan](#cara-menjalankan)
-- [Hasil Eksperimen](#hasil-eksperimen)
+- [Getting Started](#getting-started)
+- [Experiment Results](#experiment-results)
 - [Monitoring](#monitoring)
+- [Author](#author)
 
 ---
 
 ## Overview
 
-Project ini membangun pipeline MLOps lengkap untuk memprediksi apakah seorang pasien menderita penyakit jantung atau tidak (binary classification) berdasarkan data klinis.
+This project builds a complete MLOps pipeline to predict whether a patient has heart disease (binary classification) based on clinical data.
 
-**Pipeline yang dibangun:**
-1. **Eksperimen** — EDA dan preprocessing data secara otomatis
-2. **Modelling** — Pelatihan model dengan MLflow tracking
-3. **CI/CD** — Otomatisasi retraining dengan GitHub Actions
-4. **Monitoring** — Real-time monitoring dengan Prometheus & Grafana
+**Pipeline stages:**
+1. **Experimentation** — EDA and automated data preprocessing
+2. **Modelling** — Model training with MLflow experiment tracking
+3. **CI/CD** — Automated retraining with GitHub Actions and MLflow Projects
+4. **Monitoring** — Real-time monitoring with Prometheus & Grafana
 
 ---
 
 ## Tech Stack
 
-| Kategori | Tools |
+| Category | Tools |
 |---|---|
 | Language | Python 3.12 |
 | ML Framework | Scikit-Learn |
@@ -41,7 +42,7 @@ Project ini membangun pipeline MLOps lengkap untuk memprediksi apakah seorang pa
 
 ---
 
-## Struktur Project
+## Project Structure
 
 ```
 heart-disease-mlops/
@@ -57,13 +58,10 @@ heart-disease-mlops/
 │   ├── modelling_tuning.py
 │   └── requirements.txt
 ├── workflow-ci/
-│   ├── MLProject/
-│   │   ├── modelling.py
-│   │   ├── conda.yaml
-│   │   └── MLProject
-│   └── .github/
-│       └── workflows/
-│           └── ci.yml
+│   └── MLProject/
+│       ├── modelling.py
+│       ├── conda.yaml
+│       └── MLProject
 └── monitoring/
     ├── prometheus.yml
     ├── prometheus_exporter.py
@@ -74,14 +72,14 @@ heart-disease-mlops/
 
 ## Dataset
 
-- **Sumber**: [UCI ML Repository - Heart Disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
-- **Jumlah data**: 303 baris, 13 fitur + 1 target
-- **Task**: Binary Classification (0 = tidak sakit, 1 = sakit jantung)
-- **Fitur**: Campuran numerikal dan kategorikal (age, sex, cp, trestbps, chol, dll)
+- **Source**: [UCI ML Repository - Heart Disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
+- **Size**: 303 rows, 13 features + 1 target
+- **Task**: Binary Classification (0 = no disease, 1 = heart disease)
+- **Features**: Mix of numerical and categorical (age, sex, cp, trestbps, chol, etc.)
 
 ---
 
-## Cara Menjalankan
+## Getting Started
 
 ### Prerequisites
 - Python 3.12
@@ -101,30 +99,30 @@ source venv/bin/activate  # Mac/Linux
 pip install -r modelling/requirements.txt
 ```
 
-### 3. Jalankan Preprocessing Otomatis
+### 3. Run Automated Preprocessing
 ```bash
 cd experimentation/preprocessing
 python automate.py
 ```
 
-### 4. Training Model
+### 4. Train Model
 ```bash
 cd modelling
 
 # Baseline (autolog)
 python modelling.py
 
-# Dengan hyperparameter tuning (manual logging)
+# With hyperparameter tuning (manual logging)
 python modelling_tuning.py
 ```
 
-### 5. Buka MLflow UI
+### 5. Open MLflow UI
 ```bash
 mlflow ui
-# Buka http://127.0.0.1:5000
+# Open http://127.0.0.1:5000
 ```
 
-### 6. Serving Model
+### 6. Serve Model
 ```bash
 mlflow models serve \
   -m mlruns/<experiment_id>/<run_id>/artifacts/model \
@@ -133,7 +131,7 @@ mlflow models serve \
   --no-conda
 ```
 
-### 7. Jalankan Monitoring
+### 7. Run Monitoring Stack
 ```bash
 # Terminal 1 - Prometheus Exporter
 cd monitoring
@@ -146,16 +144,28 @@ docker run -d \
   -v $(pwd)/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml \
   prom/prometheus
 
-# Terminal 3 - Grafana (Docker)
+# Terminal 3 - Grafana (Docker) with SMTP for alerting
+# WARNING: Never put your real App Password in a public repo!
+# Use environment variables or secrets management instead.
 docker run -d \
   --name grafana \
   -p 3000:3000 \
+  -v grafana-storage:/var/lib/grafana \
+  -e GF_SMTP_ENABLED=true \
+  -e GF_SMTP_HOST=smtp.gmail.com:587 \
+  -e GF_SMTP_USER=yourmail@gmail.com \
+  -e GF_SMTP_PASSWORD=xxxxxxxxxxxxxx \
+  -e GF_SMTP_FROM_ADDRESS=yourmail@gmail.com \
   grafana/grafana
 
-# Buka http://localhost:3000
+# Open http://localhost:3000 (default: admin/admin)
 ```
 
-### 8. Inference
+> **Note on Grafana persistence**: The `-v grafana-storage:/var/lib/grafana` flag ensures your dashboards, alert rules, and contact points are preserved even if the container is recreated.
+
+> **Gmail App Password**: To use Gmail SMTP, enable 2-Step Verification on your Google account, then generate an App Password at [myaccount.google.com](https://myaccount.google.com) → Security → App passwords.
+
+### 8. Run Inference
 ```bash
 cd monitoring
 python inference.py
@@ -163,7 +173,7 @@ python inference.py
 
 ---
 
-## Hasil Eksperimen
+## Experiment Results
 
 | Model | Accuracy | Precision | Recall | F1 Score | ROC AUC |
 |---|---|---|---|---|---|
@@ -179,17 +189,17 @@ python inference.py
 
 ## Monitoring
 
-Sistem monitoring real-time menggunakan Prometheus dan Grafana dengan metrics:
+Real-time monitoring using Prometheus and Grafana with the following metrics:
 
-| Metric | Deskripsi |
+| Metric | Description |
 |---|---|
-| `prediction_requests_total` | Total request prediksi |
-| `prediction_class_total` | Prediksi per kelas (sakit/tidak sakit) |
-| `prediction_latency_seconds` | Latensi request prediksi |
-| `model_status` | Status model (1=up, 0=down) |
-| `prediction_positive_total` | Total prediksi positif |
-| `prediction_negative_total` | Total prediksi negatif |
-| `model_accuracy` | Akurasi model |
+| `prediction_requests_total` | Total number of prediction requests |
+| `prediction_class_total` | Predictions per class (sick/not sick) |
+| `prediction_latency_seconds` | Prediction request latency |
+| `model_status` | Model serving status (1=up, 0=down) |
+| `prediction_positive_total` | Total positive predictions |
+| `prediction_negative_total` | Total negative predictions |
+| `model_accuracy` | Model accuracy |
 
 ---
 

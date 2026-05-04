@@ -9,53 +9,53 @@ warnings.filterwarnings('ignore')
 
 
 def load_data():
-    """Memuat dataset Heart Disease dari UCI ML Repository."""
-    print(">>> Memuat dataset...")
+    """Load dataset Heart Disease from UCI ML Repository."""
+    print(">>> Load dataset...")
     heart_disease = fetch_ucirepo(id=45)
     X = heart_disease.data.features
     y = heart_disease.data.targets
     df = pd.concat([X, y], axis=1)
     df.rename(columns={'num': 'target'}, inplace=True)
 
-    # Simpan raw dataset
+    # Save raw dataset before preprocessing
     df.to_csv('heart_disease_raw.csv', index=False)
-    print(f"    Dataset dimuat: {df.shape[0]} baris, {df.shape[1]} kolom")
-    print("    heart_disease_raw.csv berhasil disimpan!")
+    print(f"    Dataset loaded: {df.shape[0]} lines, {df.shape[1]} columns")
+    print("    heart_disease_raw.csv saved successfully!")
     return df
 
 
 def convert_target(df):
-    """Konversi target ke binary (0 = tidak sakit, 1 = sakit)."""
-    print(">>> Mengkonversi target ke binary...")
+    """Convert target to binary (0 = no disease, 1 = disease)."""
+    print(">>> Converting target to binary...")
     df['target'] = df['target'].apply(lambda x: 1 if x > 0 else 0)
-    print(f"    Distribusi target:\n{df['target'].value_counts().to_string()}")
+    print(f"    Target distribution:\n{df['target'].value_counts().to_string()}")
     return df
 
 
 def handle_missing_values(df):
-    """Menangani missing values dengan median."""
-    print(">>> Menangani missing values...")
+    """Handle missing values with median."""
+    print(">>> Handling missing values...")
     before = df.isnull().sum().sum()
     df['ca'].fillna(df['ca'].median(), inplace=True)
     df['thal'].fillna(df['thal'].median(), inplace=True)
     after = df.isnull().sum().sum()
-    print(f"    Missing values sebelum: {before} → sesudah: {after}")
+    print(f"    Missing values before: {before} → after: {after}")
     return df
 
 
 def remove_duplicates(df):
-    """Menghapus data duplikat."""
-    print(">>> Menghapus duplikat...")
+    """Delete duplicate rows from the dataset."""
+    print(">>> Deleting duplicates...")
     before = len(df)
     df.drop_duplicates(inplace=True)
     after = len(df)
-    print(f"    Baris sebelum: {before} → sesudah: {after} ({before - after} duplikat dihapus)")
+    print(f"    Lines before: {before} → after: {after} ({before - after} duplicates removed)")
     return df
 
 
 def remove_outliers_iqr(df, columns):
-    """Menghapus outlier menggunakan metode IQR."""
-    print(">>> Menangani outlier (IQR)...")
+    """Delete outliers using the IQR method."""
+    print(">>> Handling outliers (IQR)...")
     df_clean = df.copy()
     for col in columns:
         Q1 = df_clean[col].quantile(0.25)
@@ -66,30 +66,30 @@ def remove_outliers_iqr(df, columns):
         before = len(df_clean)
         df_clean = df_clean[(df_clean[col] >= lower) & (df_clean[col] <= upper)]
         after = len(df_clean)
-        print(f"    {col}: {before - after} baris dihapus")
+        print(f"    {col}: {before - after} lines deleted")
     return df_clean
 
 
 def encode_categorical(df, categorical_cols):
-    """Encoding kolom kategorikal menggunakan One-Hot Encoding."""
-    print(">>> Encoding kolom kategorikal...")
+    """Encoding categorical columns using One-Hot Encoding."""
+    print(">>> Encoding categorical columns...")
     df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
-    print(f"    Shape setelah encoding: {df_encoded.shape}")
+    print(f"    Shape after encoding: {df_encoded.shape}")
     return df_encoded
 
 
 def scale_numerical(df, numerical_cols):
-    """Normalisasi kolom numerikal menggunakan StandardScaler."""
-    print(">>> Scaling kolom numerikal...")
+    """Normalize numerical columns using StandardScaler."""
+    print(">>> Scaling numerical columns...")
     scaler = StandardScaler()
     df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
-    print(f"    Kolom yang di-scale: {numerical_cols}")
+    print(f"    Columns that are scaled: {numerical_cols}")
     return df
 
 
 def split_and_save(df, test_size=0.2, random_state=42):
-    """Train-test split dan simpan hasil preprocessing."""
-    print(">>> Train-test split dan menyimpan dataset...")
+    """Train-test split and save preprocessing results."""
+    print(">>> Train-test split and saving dataset...")
     X = df.drop('target', axis=1)
     y = df['target']
 
@@ -100,21 +100,21 @@ def split_and_save(df, test_size=0.2, random_state=42):
     train_df = pd.concat([X_train, y_train], axis=1)
     test_df = pd.concat([X_test, y_test], axis=1)
 
-    # Simpan file hasil preprocessing
+    # Save preprocessing results
     df.to_csv('heart_disease_preprocessing.csv', index=False)
     train_df.to_csv('heart_disease_preprocessing_train.csv', index=False)
     test_df.to_csv('heart_disease_preprocessing_test.csv', index=False)
 
     print(f"    X_train: {X_train.shape}, X_test: {X_test.shape}")
-    print("    heart_disease_preprocessing.csv berhasil disimpan!")
-    print("    heart_disease_preprocessing_train.csv berhasil disimpan!")
-    print("    heart_disease_preprocessing_test.csv berhasil disimpan!")
+    print("    heart_disease_preprocessing.csv successfully saved!")
+    print("    heart_disease_preprocessing_train.csv successfully saved!")
+    print("    heart_disease_preprocessing_test.csv successfully saved!")
 
     return train_df, test_df
 
 
 def preprocess():
-    """Fungsi utama untuk menjalankan seluruh pipeline preprocessing."""
+    """Main function to run the entire preprocessing pipeline."""
     print("=" * 50)
     print("  AUTOMATE PREPROCESSING - HEART DISEASE DATASET")
     print("  Ni Putu Sintia Wati")
@@ -134,9 +134,9 @@ def preprocess():
     train_df, test_df = split_and_save(df)
 
     print("=" * 50)
-    print("  PREPROCESSING SELESAI!")
-    print(f"  Total data siap latih: {len(train_df)} baris")
-    print(f"  Total data uji       : {len(test_df)} baris")
+    print("  PREPROCESSING DONE!")
+    print(f"  Total training data: {len(train_df)} lines")
+    print(f"  Total test data    : {len(test_df)} lines")
     print("=" * 50)
 
     return df
