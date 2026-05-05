@@ -12,3 +12,8 @@ __pycache__
 *.tmp
 *.swp
 *.swo
+.env
+heart_disease_preprocessing_train.csv
+heart_disease_preprocessing_test.csv
+feature_importance.csv
+confusion_matrix.png

@@ -24,8 +24,47 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install mlflow==2.19.0 scikit-learn pandas numpy
+          pip install mlflow==2.19.0 scikit-learn pandas numpy matplotlib python-dotenv ucimlrepo
+
+      - name: Generate Preprocessed Dataset
+        run: |
+          cd experimentation/preprocessing
+          python automate.py
+          cp heart_disease_preprocessing_train.csv ../../workflow-ci/MLProject/
+          cp heart_disease_preprocessing_test.csv ../../workflow-ci/MLProject/
 
       - name: Run MLflow Project
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
         run: |
-          mlflow run MLProject --env-manager=local
+          mlflow run workflow-ci/MLProject --env-manager=local
+
+      - name: Upload Artifacts to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-artifacts
+          path: |
+            mlruns/
+            confusion_matrix.png
+            feature_importance.csv
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          mlflow models build-docker \
+            --model-uri "runs:/$(cat workflow-ci/MLProject/run_id.txt)/model" \
+            --name "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops" \
+            --enable-mlserver
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker tag "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops" \
+            "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops:latest"
+          docker push "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops:latest"

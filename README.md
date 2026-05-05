@@ -22,8 +22,8 @@ This project builds a complete MLOps pipeline to predict whether a patient has h
 
 **Pipeline stages:**
 1. **Experimentation** — EDA and automated data preprocessing
-2. **Modelling** — Model training with MLflow experiment tracking
-3. **CI/CD** — Automated retraining with GitHub Actions and MLflow Projects
+2. **Modelling** — Model training with MLflow experiment tracking, logged to DagsHub
+3. **CI/CD** — Automated retraining with GitHub Actions, artifact storage, and Docker Hub deployment
 4. **Monitoring** — Real-time monitoring with Prometheus & Grafana
 
 ---
@@ -34,10 +34,10 @@ This project builds a complete MLOps pipeline to predict whether a patient has h
 |---|---|
 | Language | Python 3.12 |
 | ML Framework | Scikit-Learn |
-| Experiment Tracking | MLflow 2.19.0 |
+| Experiment Tracking | MLflow 2.19.0 + DagsHub |
 | CI/CD | GitHub Actions |
 | Monitoring | Prometheus + Grafana |
-| Containerization | Docker |
+| Containerization | Docker + Docker Hub |
 | Data Source | UCI ML Repository |
 
 ---
@@ -56,8 +56,13 @@ heart-disease-mlops/
 ├── modelling/
 │   ├── modelling.py
 │   ├── modelling_tuning.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── .env              # (not committed)
 ├── workflow-ci/
+│   ├── .github/
+│   │   └── workflows/
+│   │       └── ci.yml
 │   └── MLProject/
 │       ├── modelling.py
 │       ├── conda.yaml
@@ -99,13 +104,28 @@ source venv/bin/activate  # Mac/Linux
 pip install -r modelling/requirements.txt
 ```
 
-### 3. Run Automated Preprocessing
+### 3. Configure Environment Variables
+```bash
+cp modelling/.env.example modelling/.env
+# Edit modelling/.env and fill in your credentials
+```
+
+Required variables in `modelling/.env`:
+```
+MLFLOW_TRACKING_URI=https://dagshub.com/<your_username>/heart-disease-mlops.mlflow
+MLFLOW_TRACKING_USERNAME=<your_dagshub_username>
+MLFLOW_TRACKING_PASSWORD=<your_dagshub_token>
+```
+
+### 4. Run Automated Preprocessing
 ```bash
 cd experimentation/preprocessing
 python automate.py
+cp heart_disease_preprocessing_train.csv ../../modelling/
+cp heart_disease_preprocessing_test.csv ../../modelling/
 ```
 
-### 4. Train Model
+### 5. Train Model
 ```bash
 cd modelling
 
@@ -116,13 +136,20 @@ python modelling.py
 python modelling_tuning.py
 ```
 
-### 5. Open MLflow UI
+Experiments and artifacts (including `confusion_matrix.png` and `feature_importance.csv`) are logged to [DagsHub](https://dagshub.com/sintiasnn/heart-disease-mlops).
+
+### 6. Open MLflow UI (via DagsHub)
+```
+https://dagshub.com/sintiasnn/heart-disease-mlops.mlflow
+```
+
+Or locally:
 ```bash
 mlflow ui
 # Open http://127.0.0.1:5000
 ```
 
-### 6. Serve Model
+### 7. Serve Model
 ```bash
 mlflow models serve \
   -m mlruns/<experiment_id>/<run_id>/artifacts/model \
@@ -131,7 +158,7 @@ mlflow models serve \
   --no-conda
 ```
 
-### 7. Run Monitoring Stack
+### 8. Run Monitoring Stack
 ```bash
 # Terminal 1 - Prometheus Exporter
 cd monitoring
@@ -165,11 +192,33 @@ docker run -d \
 
 > **Gmail App Password**: To use Gmail SMTP, enable 2-Step Verification on your Google account, then generate an App Password at [myaccount.google.com](https://myaccount.google.com) → Security → App passwords.
 
-### 8. Run Inference
+### 9. Run Inference
 ```bash
 cd monitoring
 python inference.py
 ```
+
+---
+
+## CI/CD Pipeline
+
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs automatically on every push to `main`:
+
+1. Generates preprocessed dataset via `automate.py`
+2. Runs MLflow Project and logs experiments to DagsHub
+3. Uploads `mlruns/`, `confusion_matrix.png`, and `feature_importance.csv` as GitHub Artifacts
+4. Builds a Docker image using `mlflow models build-docker`
+5. Pushes the image to Docker Hub
+
+### Required GitHub Secrets
+
+| Secret | Description |
+|---|---|
+| `MLFLOW_TRACKING_URI` | DagsHub MLflow tracking URI |
+| `MLFLOW_TRACKING_USERNAME` | DagsHub username |
+| `MLFLOW_TRACKING_PASSWORD` | DagsHub access token |
+| `DOCKERHUB_USERNAME` | Docker Hub username |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
 
 ---
 
