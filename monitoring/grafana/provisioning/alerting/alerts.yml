@@ -1,0 +1,142 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: heart-disease-alerts
+    folder: Heart Disease MLOps
+    interval: 1m
+    rules:
+      - uid: alert-model-down
+        title: Model Down
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: "- Mixed -"
+            model:
+              datasource:
+                type: prometheus
+                uid: "- Mixed -"
+              expr: model_status
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: "Model serving is down"
+          description: "model_status has been 0 for more than 1 minute"
+        labels:
+          severity: critical
+
+      - uid: alert-high-error-rate
+        title: High Prediction Error Rate
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: "- Mixed -"
+            model:
+              datasource:
+                type: prometheus
+                uid: "- Mixed -"
+              expr: rate(prediction_error_total[5m])
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: "High prediction error rate detected"
+          description: "Error rate exceeded 0.1 req/s over the last 5 minutes"
+        labels:
+          severity: warning
+
+      - uid: alert-high-latency
+        title: High Prediction Latency
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: "- Mixed -"
+            model:
+              datasource:
+                type: prometheus
+                uid: "- Mixed -"
+              expr: histogram_quantile(0.95, rate(prediction_latency_seconds_bucket[5m]))
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1.0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: "High prediction latency detected"
+          description: "P95 latency exceeded 1 second over the last 5 minutes"
+        labels:
+          severity: warning

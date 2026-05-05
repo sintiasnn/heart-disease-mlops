@@ -52,6 +52,24 @@ MODEL_ACCURACY = Gauge(
     'Model accuracy (simulated)'
 )
 
+# Counter: total prediction errors
+PREDICTION_ERROR_TOTAL = Counter(
+    'prediction_error_total',
+    'Total number of failed prediction requests'
+)
+
+# Gauge: ratio of positive predictions
+PREDICTION_POSITIVE_RATE = Gauge(
+    'prediction_positive_rate',
+    'Ratio of positive predictions (heart disease) over total predictions'
+)
+
+# Gauge: model response size in bytes
+MODEL_RESPONSE_SIZE_BYTES = Gauge(
+    'model_response_size_bytes',
+    'Size of the last model response in bytes'
+)
+
 # ========================
 # Configuration
 # ========================
@@ -110,20 +128,23 @@ def predict(data):
                 negative_count += 1
                 PREDICTION_CLASS_TOTAL.labels(class_label='no_heart_disease').inc()
 
+            total = positive_count + negative_count
             PREDICTION_POSITIVE.set(positive_count)
             PREDICTION_NEGATIVE.set(negative_count)
-
-            # Simulate accuracy
+            PREDICTION_POSITIVE_RATE.set(round(positive_count / total, 4) if total > 0 else 0)
+            MODEL_RESPONSE_SIZE_BYTES.set(len(response.content))
             MODEL_ACCURACY.set(round(random.uniform(0.72, 0.82), 4))
 
             print(f"    Prediction: {prediction} | Latency: {latency:.3f}s | +:{positive_count} -:{negative_count}")
         else:
             MODEL_STATUS.set(0)
+            PREDICTION_ERROR_TOTAL.inc()
             print(f"    Error: {response.status_code}")
 
     except Exception as e:
         latency = time.time() - start_time
         MODEL_STATUS.set(0)
+        PREDICTION_ERROR_TOTAL.inc()
         print(f"    Exception: {e}")
 
 

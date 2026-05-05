@@ -68,9 +68,17 @@ heart-disease-mlops/
 │       ├── conda.yaml
 │       └── MLProject
 └── monitoring/
+    ├── docker-compose.yml
     ├── prometheus.yml
     ├── prometheus_exporter.py
-    └── inference.py
+    ├── inference.py
+    ├── .env.example
+    └── grafana/
+        └── provisioning/
+            ├── datasources/
+            │   └── prometheus.yml
+            └── alerting/
+                └── alerts.yml
 ```
 
 ---
@@ -164,31 +172,16 @@ mlflow models serve \
 cd monitoring
 python prometheus_exporter.py
 
-# Terminal 2 - Prometheus (Docker)
-docker run -d \
-  --name prometheus \
-  -p 9090:9090 \
-  -v $(pwd)/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml \
-  prom/prometheus
-
-# Terminal 3 - Grafana (Docker) with SMTP for alerting
-# WARNING: Never put your real App Password in a public repo!
-# Use environment variables or secrets management instead.
-docker run -d \
-  --name grafana \
-  -p 3000:3000 \
-  -v grafana-storage:/var/lib/grafana \
-  -e GF_SMTP_ENABLED=true \
-  -e GF_SMTP_HOST=smtp.gmail.com:587 \
-  -e GF_SMTP_USER=yourmail@gmail.com \
-  -e GF_SMTP_PASSWORD=xxxxxxxxxxxxxx \
-  -e GF_SMTP_FROM_ADDRESS=yourmail@gmail.com \
-  grafana/grafana
+# Terminal 2 - Prometheus + Grafana via Docker Compose
+cd monitoring
+cp .env.example .env
+# Edit .env and fill in your SMTP credentials (optional)
+docker compose up -d
 
 # Open http://localhost:3000 (default: admin/admin)
 ```
 
-> **Note on Grafana persistence**: The `-v grafana-storage:/var/lib/grafana` flag ensures your dashboards, alert rules, and contact points are preserved even if the container is recreated.
+> **Grafana Provisioning**: Datasource (Prometheus) dan alert rules sudah otomatis ter-konfigurasi via file di `grafana/provisioning/`. Tidak perlu setup manual di UI.
 
 > **Gmail App Password**: To use Gmail SMTP, enable 2-Step Verification on your Google account, then generate an App Password at [myaccount.google.com](https://myaccount.google.com) → Security → App passwords.
 
@@ -249,6 +242,17 @@ Real-time monitoring using Prometheus and Grafana with the following metrics:
 | `prediction_positive_total` | Total positive predictions |
 | `prediction_negative_total` | Total negative predictions |
 | `model_accuracy` | Model accuracy |
+| `prediction_error_total` | Total failed prediction requests |
+| `prediction_positive_rate` | Ratio of positive predictions over total |
+| `model_response_size_bytes` | Size of the last model response in bytes |
+
+**Alert Rules (auto-provisioned):**
+
+| Alert | Condition | Severity |
+|---|---|---|
+| Model Down | `model_status == 0` for > 1 min | Critical |
+| High Error Rate | `rate(prediction_error_total[5m]) > 0.1` for > 2 min | Warning |
+| High Latency | P95 latency > 1s for > 2 min | Warning |
 
 ---
 
