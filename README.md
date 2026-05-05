@@ -1,5 +1,11 @@
 # Heart Disease MLOps Pipeline
 
+![CI](https://github.com/sintiasnn/heart-disease-mlops/actions/workflows/ci.yml/badge.svg)
+[![DagsHub](https://img.shields.io/badge/DagsHub-Experiments-orange?logo=dagshub)](https://dagshub.com/sintiasnn/heart-disease-mlops.mlflow)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Image-blue?logo=docker)](https://hub.docker.com/r/sintiasnn/heart-disease-mlops)
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
+![MLflow](https://img.shields.io/badge/MLflow-2.19.0-blue?logo=mlflow)
+
 An end-to-end MLOps pipeline for heart disease prediction using the Heart Disease dataset from the UCI Machine Learning Repository. This project covers the full MLOps lifecycle — from experimentation and model building to CI/CD workflow automation and real-time monitoring.
 
 ---
