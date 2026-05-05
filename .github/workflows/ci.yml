@@ -56,18 +56,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Image
+      - name: Download Model Artifact
         env:
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
           MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
         run: |
-          mlflow models build-docker \
-            --model-uri "runs:/$(cat workflow-ci/MLProject/run_id.txt)/model" \
-            --name "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops"
+          RUN_ID=$(cat workflow-ci/MLProject/run_id.txt)
+          mlflow artifacts download \
+            --run-id $RUN_ID \
+            --artifact-path model \
+            --dst-path workflow-ci/MLProject/model
 
-      - name: Push Docker Image to Docker Hub
+      - name: Build and Push Docker Image
         run: |
-          docker tag "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops" \
-            "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops:latest"
-          docker push "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops:latest"
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops:latest workflow-ci/MLProject/
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops:latest
