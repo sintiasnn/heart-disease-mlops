@@ -165,8 +165,13 @@ mlflow ui
 
 ### 7. Serve Model
 ```bash
+# Set environment variables first
+export MLFLOW_TRACKING_URI=https://dagshub.com/sintiasnn/heart-disease-mlops.mlflow
+export MLFLOW_TRACKING_USERNAME=sintiasnn
+export MLFLOW_TRACKING_PASSWORD=<your_dagshub_token>
+
 mlflow models serve \
-  -m mlruns/<experiment_id>/<run_id>/artifacts/model \
+  -m "runs:/<run_id>/model" \
   -p 5001 \
   --env-manager=local \
   --no-conda
