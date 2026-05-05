@@ -64,8 +64,7 @@ jobs:
         run: |
           mlflow models build-docker \
             --model-uri "runs:/$(cat workflow-ci/MLProject/run_id.txt)/model" \
-            --name "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops" \
-            --enable-mlserver
+            --name "${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-mlops"
 
       - name: Push Docker Image to Docker Hub
         run: |
