@@ -172,6 +172,8 @@ mlflow models serve \
   --no-conda
 ```
 
+> **Get the run ID**: Buka [DagsHub MLflow UI](https://dagshub.com/sintiasnn/heart-disease-mlops.mlflow) → pilih experiment → klik run yang diinginkan → salin Run ID dari bagian atas halaman. Atau ambil dari output terminal saat training: `🏃 View run ... at: https://dagshub.com/.../runs/<run_id>`
+
 ### 8. Run Monitoring Stack
 ```bash
 # Terminal 1 - Prometheus Exporter
