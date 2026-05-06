@@ -89,6 +89,42 @@ heart-disease-mlops/
 
 ---
 
+## Pipeline Diagram
+
+```mermaid
+flowchart TD
+    A[Raw Dataset\nheart_disease_raw.csv] --> B[automate.py\nPreprocessing]
+    B --> C[train.csv + test.csv]
+
+    C --> D[modelling.py\nBaseline Training]
+    C --> E[modelling_tuning.py\nHyperparameter Tuning]
+
+    D --> F[MLflow + DagsHub\nExperiment Tracking]
+    E --> F
+
+    F --> G[Artifacts\nconfusion_matrix.png\nfeature_importance.csv]
+
+    subgraph CI/CD [GitHub Actions CI/CD]
+        H[Push to main] --> I[Run automate.py]
+        I --> J[Run MLflow Project]
+        J --> K[Upload Artifacts]
+        K --> L[Build Docker Image]
+        L --> M[Push to Docker Hub]
+    end
+
+    F --> N[mlflow models serve\nREST API :5001]
+
+    subgraph Monitoring
+        N --> O[inference.py\nSend Requests]
+        O --> P[prometheus_exporter.py\n:8000]
+        P --> Q[Prometheus\n:9090]
+        Q --> R[Grafana\n:3000]
+        R --> S[Alerts\nEmail via SMTP]
+    end
+```
+
+---
+
 ## Dataset
 
 - **Source**: [UCI ML Repository - Heart Disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
